@@ -23,6 +23,12 @@ namespace SystemUserAttendance.Services
             var employeeExists = await _context.Employees.AnyAsync(e => e.Id == request.EmployeeId);
             if (!employeeExists) return false;
 
+            //Czy pracownik ma wniosek
+            var hasOverLappingLeave = await _context.Leaves.AnyAsync(l => l.EmployeeId == request.EmployeeId &&
+                (l.Status == LeaveStatus.Pending || l.Status == LeaveStatus.Approved) && (request.DateFrom <= l.DateTo && request.DateTo >= l.DateFrom));
+
+            if (hasOverLappingLeave) return false;
+
             var leave = new LeaveRequest
             {
                 EmployeeId = request.EmployeeId,
@@ -38,23 +44,39 @@ namespace SystemUserAttendance.Services
             return true;
         }
 
-        public async Task<IEnumerable<LeaveRequest>> GetEmployeeLeavesAsync(int employeeId)
+        public async Task<IEnumerable<LeaveRequest>> GetLeavesAsync(int? employeeId)
         {
-            return await _context.Leaves.Where(l => l.EmployeeId == employeeId).ToListAsync();
+            var query = _context.Leaves.AsQueryable();
+
+            if (employeeId.HasValue)
+            {
+                query = query.Where(l => l.EmployeeId == employeeId.Value);
+            }
+
+            return await query.ToListAsync();
         }
 
-        public async Task<bool> UpdateLeaveStatusAsync(int leaveRequestId,  LeaveStatus newStatus)
+        public async Task<bool> ApproveLeaveAsync(int id)
         {
-            //wyszukanie po id
-            var leaveRequest = await _context.Leaves.FindAsync(leaveRequestId);
+            var leave = await _context.Leaves.FindAsync(id);
 
-            //Czy wniosek istnieje
-            if (leaveRequest == null) return false;
+            //Warunek rozpatrywania wniosku
+            if (leave == null || leave.Status != LeaveStatus.Pending) return false;
 
-            //Zmiana statusu
-            leaveRequest.Status = newStatus;
+            leave.Status = LeaveStatus.Approved;
             await _context.SaveChangesAsync();
 
+            return true;
+        }
+
+        public async Task<bool> RejectLeaveAsync(int id)
+        {
+            var leave = await _context.Leaves.FindAsync(id);
+            //Warunek rozpatrywania wniosku
+            if (leave == null || leave.Status != LeaveStatus.Pending) return false;
+
+            leave.Status = LeaveStatus.Rejected;
+            await _context.SaveChangesAsync();
             return true;
         }
     }

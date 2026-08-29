@@ -42,5 +42,25 @@ namespace SystemUserAttendance.Controllers
 
             return Ok("Wyjście zarejestrowane.");
         }
+
+        [HttpPut("{attendanceId}")]
+        public async Task<IActionResult> UpdateCheckIn(int attendanceId, [FromBody] UpdateAttendance request)
+        {
+            var success = await _attendanceServices.UpdateCheckInTimeAsync(attendanceId, request.NewCheckInTime);
+
+            if (!success)
+            {
+                return BadRequest("Błąd!! Błędna godzina lub dane użytkownika");
+            }
+
+            return Ok("Godzina wejścia została zaktualizowana.");
+        }
+
+        [HttpGet("{employeeId}")]
+        public async Task<IActionResult> GetAttendanceHistory(int employeeId)
+        {
+            var history = await _attendanceServices.GetEmployeeAttendanceAsync(employeeId);
+            return Ok(history);
+        }
     }
 }

@@ -5,7 +5,7 @@ using SystemUserAttendance.Services;
 namespace SystemUserAttendance.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/leaves")]
     public class LeaveRequestController :ControllerBase
     {
         private readonly LeaveRequestServices _leaveServices;
@@ -28,24 +28,32 @@ namespace SystemUserAttendance.Controllers
             return Ok("Wniosek został złozony i oczekuje na zaakcepotowanie");
         }
 
-        [HttpGet("{employeeId}")]
-        public async Task<IActionResult> GetEmployeeLeaves(int employeeId)
+        [HttpGet]
+        public async Task<IActionResult> GetLeaves([FromQuery] int? employeeId)
         {
-            var leaves = await _leaveServices.GetEmployeeLeavesAsync(employeeId);
+            var leaves = await _leaveServices.GetLeavesAsync(employeeId);
             return Ok(leaves);
         }
 
-        [HttpPut("{id}/status")]
-        public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatus request)
+        [HttpPut("{id}/approve")]
+        public async Task<IActionResult> approveLeave(int id)
         {
-            var success = await _leaveServices.UpdateLeaveStatusAsync(id, request.NewStatus);
+            var success = await _leaveServices.ApproveLeaveAsync(id);
 
             if (!success)
             {
-                return NotFound("Błąd!! Nie ma takiego wniosku.");
+                return NotFound("Błąd!! Nie ma takiego wniosku lub nie został przeznaczony do rozpatrzenia.");
             }
 
-            return Ok("Status został zaktualizowany");
+            return Ok("Urlop został zatwierdzony.");
+        }
+
+        [HttpPut("{id}/reject")]
+        public async Task<IActionResult> RejectLeave(int id)
+        {
+            var success = await _leaveServices.RejectLeaveAsync(id);
+            if (!success) return BadRequest("Błąd!! Nie ma takiego wniosku lub nie został przeznaczony do rozpatrzenia.");
+            return Ok("Urlop został odrzucony.");
         }
     }
 }

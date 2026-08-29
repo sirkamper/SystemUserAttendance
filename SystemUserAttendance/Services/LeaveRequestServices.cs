@@ -6,8 +6,9 @@ namespace SystemUserAttendance.Services
     public interface LeaveRequestServices
     {
         Task<bool> SubmitLeaveRequestAsync(LeaveRequestDTO request);
-        Task<IEnumerable<LeaveRequest>> GetEmployeeLeavesAsync(int employeeId);
+        Task<IEnumerable<LeaveRequest>> GetLeavesAsync(int? employeeId);
 
-        Task<bool> UpdateLeaveStatusAsync(int leaveRequestId, LeaveStatus newStatus);
+        Task<bool> ApproveLeaveAsync(int id);
+        Task<bool> RejectLeaveAsync(int id);
     }
 }

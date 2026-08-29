@@ -48,5 +48,26 @@ namespace SystemUserAttendance.Services
 
             return true;
         }
+
+        public async Task<bool> UpdateCheckInTimeAsync(int attendanceId, DateTime newTime)
+        {
+            var attendance = await _context.Attendances.FindAsync(attendanceId);
+
+            if (attendance == null) return false; //Sprawdzenie czy wpis obecności istnieje
+
+            if (newTime > DateTime.Now) return false; //Poprawność daty
+
+            if (attendance.CheckOutTime.HasValue && newTime > attendance.CheckOutTime.Value) return false;
+
+            attendance.CheckInTime = newTime;
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<IEnumerable<Attendance>> GetEmployeeAttendanceAsync(int employeeId)
+        {
+            return await _context.Attendances.Where(a => a.EmployeeId == employeeId).OrderByDescending(a => a.CheckInTime).ToListAsync();
+        }
     }
 }
