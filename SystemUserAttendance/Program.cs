@@ -12,6 +12,8 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectio
 //Logika biznesowa
 builder.Services.AddScoped<SystemUserAttendance.Services.AttendanceServices, SystemUserAttendance.Services.AttendanceLogic>();
 
+builder.Services.AddScoped<SystemUserAttendance.Services.LeaveRequestServices, SystemUserAttendance.Services.LeaveRequestLogic>();
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
