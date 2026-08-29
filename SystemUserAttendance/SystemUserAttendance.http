@@ -3,4 +3,18 @@
 GET {{SystemUserAttendance_HostAddress}}/weatherforecast/
 Accept: application/json
 
-###
+### Check-in
+POST {{SystemUserAttendance_HostAddress}}/api/Attendance/checkin
+Content-Type: application/json
+
+{
+  "employeeId" :1
+}
+
+### Check-out
+POST {{SystemUserAttendance_HostAddress}}/api/Attendance/checkout
+Content-Type: application/json
+
+{
+  "employeeId": 1
+}
